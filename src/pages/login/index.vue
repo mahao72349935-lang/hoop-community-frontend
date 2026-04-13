@@ -47,24 +47,21 @@
     // 生成的篮球占位 Logo
     const logoUrl = ref('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23f97316"/><path d="M50 5 L50 95 M5 50 L95 50 M18 18 Q 50 50 18 82 M82 18 Q 50 50 82 82" stroke="%23fff" stroke-width="4" fill="none" /></svg>');
 
-    // 是否为开发环境（微信开发者工具中无法真正获取手机号）
-    const isDev = process.env.NODE_ENV === 'development';
-
     // 微信获取手机号回调
     const handleGetPhoneNumber = async (e) => {
         let code = '';
         let encryptedData = '';
         let iv = '';
         
-        if (!isDev && e.detail.errMsg === 'getPhoneNumber:ok') {
-            // 生产环境：使用微信真实返回的 code
+        if (e.detail.errMsg === 'getPhoneNumber:ok' && e.detail.code) {
+            // 正常获取到手机号数据，走真实登录流程
             code = e.detail.code;
-            encryptedData = e.detail.encryptedData;
-            iv = e.detail.iv;
+            encryptedData = e.detail.encryptedData || '';
+            iv = e.detail.iv || '';
             console.log('获取手机号成功, 准备发送给后端:', { code, encryptedData, iv });
         } else {
-            // 开发环境：强制走 mock 后门
-            console.warn('开发环境或获取手机号失败，使用 mock 登录:', e.detail);
+            // 获取手机号失败（用户拒绝授权等），走 mock 后门
+            console.warn('获取手机号失败，使用 mock 登录:', e.detail);
             code = 'mock_test_code';
         }
         
