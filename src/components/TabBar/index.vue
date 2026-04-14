@@ -8,7 +8,7 @@
 <template>
     <div class="tab-bar-container">
         <nut-tabbar v-model="activeTab" @tab-switch="tabSwitch" bottom safe-area-inset-bottom inactive-color="#7d7e80"
-            active-color="#699E3C">
+            active-color="#6474E5">
             <nut-tabbar-item v-for="item in tabList" :key="item.name" :name="item.name" :tab-title="item.title"
                 :icon="item.icon">
             </nut-tabbar-item>

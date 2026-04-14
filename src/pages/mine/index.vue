@@ -7,9 +7,8 @@
             <div class="header-right">
                 <div class="header-right-text">
                     <div class="header-right-text-username">{{ userInfo.username }}</div>
-                    <div class="header-right-text-phone">{{ userInfo.phoneNumber }}</div>
+                    <div class="header-right-text-phone">{{ userInfo.phone }}</div>
                 </div>
-                <nut-icon name="rect-right" custom-color="#b0abab" size="16"></nut-icon>
             </div>
         </div>
         <div class="wrapper">
@@ -20,6 +19,11 @@
                     </template>
                 </nut-cell>
                 <nut-cell title="退出登录" @click="handleLogout">
+                    <template #link>
+                        <nut-icon name="rect-right" custom-color="#b0abab" size="16"></nut-icon>
+                    </template>
+                </nut-cell>
+                <nut-cell title="修改个人信息" @click="handleUpdateUserInfo">
                     <template #link>
                         <nut-icon name="rect-right" custom-color="#b0abab" size="16"></nut-icon>
                     </template>
@@ -56,9 +60,12 @@ const handleLogout = () => {
 const userName = computed(() => {
     return userInfo.value.username ? userInfo.value.username.slice(0, 1) : '用户';
 });
-const getPhoneNumber = (e) => {
-    console.log('e: ', e);
-}
+const handleUpdateUserInfo = () => {
+    uni.navigateTo({
+        url: '/pages/user/updateUserInfo/index'
+    });
+};
+
 </script>
 
 <style scoped lang="scss">
@@ -88,7 +95,7 @@ const getPhoneNumber = (e) => {
                 width: 100rpx;
                 height: 100rpx;
                 border-radius: 50%;
-                background-color: #699E3C;
+                background-color: #6474E5;
                 color: #fff;
                 font-size: 32rpx;
                 text-align: center;

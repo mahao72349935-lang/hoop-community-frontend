@@ -22,6 +22,20 @@
 			}
 		}
 	],
+	"subPackages": [
+		{
+			"root": "pages/user",
+			"pages": [
+				{
+					"path": "updateUserInfo/index",
+					"style": {
+						"navigationBarTitleText": "修改个人信息",
+						"navigationBarBackgroundColor": "#fff"
+					}
+				}
+			]
+		}
+	],
 	"tabBar": {
 		"custom": true,
 		"list": [
@@ -37,7 +51,7 @@
 	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "环境检测",
+		"navigationBarTitleText": "rd-hoop",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	}

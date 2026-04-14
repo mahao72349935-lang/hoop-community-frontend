@@ -104,10 +104,10 @@ const handleMenuClick = (item) => {
                     content: '';
                     display: block;
                     width: 6rpx;
-                    height: 24rpx;
-                    background-color: #699E3C;
+                    height: 28rpx;
+                    background-color: #6474E5;
                     position: absolute;
-                    bottom: 8rpx;
+                    bottom: 6rpx;
                     left: 0;
                 }
             }

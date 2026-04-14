@@ -4,32 +4,25 @@
 
 import { request } from '@/utils/request';
 
-// 用户登录
-export const loginApi = (data) => {
-    return request({
-        method: 'post',
-        url: '/auth/app/login',
-        data
-    });
-};
 
-// 微信手机号登录
-export const wxLoginApi = (data) => {
-    return request({
-        method: 'post',
-        url: '/api/v1/auth/wx-login',
-        data
-    });
-};
-
-// 用户注册
+// 手机号 + 密码 注册
 export const registerApi = (data) => {
     return request({
         method: 'post',
-        url: '/auth/register',
+        url: '/api/v1/auth/register',
         data
     });
 };
+
+// 手机号 + 密码 登录（附带微信 code 静默绑定 openid）
+export const loginApi = (data) => {
+    return request({
+        method: 'post',
+        url: '/api/v1/auth/login',
+        data
+    });
+};
+
 
 export const getCaptchaCodeApi = () => {
     return request({
