@@ -1,58 +1,70 @@
 {
-	"pages": [
-		{
-			"path": "pages/home/index",
-			"style": {
-				"navigationBarTitleText": "首页",
-				"navigationBarBackgroundColor": "#fff"
-			}
-		},
-		{
-			"path": "pages/mine/index",
-			"style": {
-				"navigationBarTitleText": "个人中心",
-				"navigationBarBackgroundColor": "#fff"
-			}
-		},
-		{
-			"path": "pages/login/index",
-			"style": {
-				"navigationBarTitleText": "登录",
-				"navigationBarBackgroundColor": "#fff"
-			}
-		}
-	],
-	"subPackages": [
-		{
-			"root": "pages/user",
-			"pages": [
-				{
-					"path": "updateUserInfo/index",
-					"style": {
-						"navigationBarTitleText": "修改个人信息",
-						"navigationBarBackgroundColor": "#fff"
-					}
-				}
-			]
-		}
-	],
-	"tabBar": {
-		"custom": true,
-		"list": [
-			{
-				"pagePath": "pages/home/index",
-				"text": "首页"
-			},
-			{
-				"pagePath": "pages/mine/index",
-				"text": "我的"
-			}
-		]
-	},
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "rd-hoop",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	}
+    "pages": [
+        {
+            "path": "pages/home/index",
+            "style": {
+                "navigationBarTitleText": "首页",
+                "navigationBarBackgroundColor": "#fff"
+            }
+        },
+        {
+            "path": "pages/mine/index",
+            "style": {
+                "navigationBarTitleText": "个人中心",
+                "navigationBarBackgroundColor": "#fff"
+            }
+        },
+        {
+            "path": "pages/login/index",
+            "style": {
+                "navigationBarTitleText": "登录",
+                "navigationBarBackgroundColor": "#fff"
+            }
+        }
+    ],
+    "subPackages": [
+        {
+            "root": "pages/user",
+            "pages": [
+                {
+                    "path": "updateUserInfo/index",
+                    "style": {
+                        "navigationBarTitleText": "修改个人信息",
+                        "navigationBarBackgroundColor": "#fff"
+                    }
+                }
+            ]
+        },
+        {
+            "root": "pages/team",
+            "pages": [
+                {
+                    "path": "updateTeam/index",
+                    "style": {
+                        "navigationBarTitleText": "创建球队",
+                        "navigationBarBackgroundColor": "#fff"
+                    }
+                }
+            ]
+        }
+    ],
+    "tabBar": {
+        "custom": true,
+        "list": [
+            {
+                "pagePath": "pages/home/index",
+                "text": "首页"
+            },
+            {
+                "pagePath": "pages/mine/index",
+                "text": "我的"
+            }
+        ]
+    },
+    "globalStyle": {
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "rd-hoop",
+        "navigationBarBackgroundColor": "#F8F8F8",
+        "backgroundColor": "#F8F8F8"
+    }
 }

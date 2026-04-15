@@ -2,11 +2,14 @@
     <div class="mine-page">
         <div class="mine-header">
             <div class="header-left">
-                <div class="avatar">{{ userName }}</div>
+                <nut-avatar size="large" v-if="userInfo.avatarUrl">
+                    <image :src="userInfo.avatarUrl"></image>
+                </nut-avatar>
+                <div class="avatar" v-else>{{ userName }}</div>
             </div>
             <div class="header-right">
                 <div class="header-right-text">
-                    <div class="header-right-text-username">{{ userInfo.username }}</div>
+                    <div class="header-right-text-username">{{ userInfo.realName || userInfo.username }}</div>
                     <div class="header-right-text-phone">{{ userInfo.phone }}</div>
                 </div>
             </div>
@@ -28,6 +31,11 @@
                         <nut-icon name="rect-right" custom-color="#b0abab" size="16"></nut-icon>
                     </template>
                 </nut-cell>
+                <nut-cell title="创建球队" @click="handleCreateTeam">
+                    <template #link>
+                        <nut-icon name="rect-right" custom-color="#b0abab" size="16"></nut-icon>
+                    </template>
+                </nut-cell>
             </nut-cell-group>
         </div>
         <TabBar tab="mine" />
@@ -41,13 +49,12 @@ const userInfo = ref({
     username: '',
     phoneNumber: ''
 });
-onMounted(() => {
+onShow(() => {
     getUserInfo();
 });
 const getUserInfo = async () => {
     // 缓存中获取用户信息
     const result = uni.getStorageSync('userInfo');
-    console.log('result: ', result);
     userInfo.value = result || {};
 };
 const handleLogout = () => {
@@ -58,11 +65,23 @@ const handleLogout = () => {
     // });
 };
 const userName = computed(() => {
-    return userInfo.value.username ? userInfo.value.username.slice(0, 1) : '用户';
+    if (userInfo.value.realName) {
+        return userInfo.value.realName.slice(0, 1);
+    } else if (userInfo.value.username) {
+        return userInfo.value.username.slice(0, 1);
+    } else {
+        return '用户';
+    }
 });
 const handleUpdateUserInfo = () => {
     uni.navigateTo({
         url: '/pages/user/updateUserInfo/index'
+    });
+};
+
+const handleCreateTeam = () => {
+    uni.navigateTo({
+        url: '/pages/team/updateTeam/index'
     });
 };
 

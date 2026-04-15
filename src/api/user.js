@@ -4,7 +4,6 @@
 
 import { request } from '@/utils/request';
 
-
 // 手机号 + 密码 注册
 export const registerApi = (data) => {
     return request({
@@ -23,7 +22,6 @@ export const loginApi = (data) => {
     });
 };
 
-
 export const getCaptchaCodeApi = () => {
     return request({
         method: 'get',
@@ -35,15 +33,15 @@ export const getCaptchaCodeApi = () => {
 export const getUserInfoApi = () => {
     return request({
         method: 'get',
-        url: '/user/profile/info'
+        url: '/api/v1/user/profile/info'
     });
 };
 
 // 更新用户信息
 export const updateUserInfoApi = (data) => {
     return request({
-        method: 'put',
-        url: '/user/info',
+        method: 'post',
+        url: '/api/v1/user/updateUserInfo',
         data
     });
 };

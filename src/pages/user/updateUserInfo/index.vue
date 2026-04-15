@@ -7,12 +7,12 @@
             <nut-form-item label="绰号" prop="nickname">
                 <nut-input v-model="form.nickname" placeholder="场上或队友对你的称呼" />
             </nut-form-item>
-            <nut-form-item label="年龄" prop="age" :rules="[
-                { required: true, message: '请填写年龄' },
-                { validator: ageNumberValidator, message: '必须输入数字' },
-                { validator: ageRangeValidator, message: '必须输入0-80区间' },
+            <nut-form-item is-link label="生日" prop="birthday" :rules="[
+                { required: true, message: '请选择生日' },
+                { validator: birthdayValidator, message: '请选择有效的出生日期' },
             ]">
-                <nut-input v-model="form.age" placeholder="请输入年龄" />
+                <nut-input :model-value="birthdayDisplayText" placeholder="请选择生日（年月日）" readonly is-link
+                    @click="openBirthdayPicker" />
             </nut-form-item>
             <nut-form-item label="球龄" prop="yearsOfPlaying" is-link>
                 <nut-input :model-value="yearsDisplayText" placeholder="请选择球龄" readonly @click="openYearsPicker" />
@@ -28,10 +28,12 @@
             <nut-form-item label="联系电话" prop="phone">
                 <nut-input disabled :model-value="form.phone" type="text" max-length="11" placeholder="请输入手机号" />
             </nut-form-item>
-            <nut-form-item label="所在地区">
-                <nut-input v-model="form.region.province" placeholder="省" />
-                <nut-input v-model="form.region.city" class="region-row" placeholder="市" />
-                <nut-input v-model="form.region.district" class="region-row" placeholder="区/县" />
+            <nut-form-item label="所在地区" is-link>
+                <nut-input :model-value="regionDisplayText" placeholder="请选择省市区" readonly is-link
+                    @click="openRegionPicker" />
+            </nut-form-item>
+            <nut-form-item label="详细地址" prop="region.detail">
+                <nut-input v-model="form.region.detail" type="text" placeholder="请输入详细地址" />
             </nut-form-item>
             <nut-form-item label="伤病详情" prop="injuryDetails">
                 <nut-textarea v-model="form.injuryDetails" placeholder="无伤病可留空；如有请写明部位、时间、是否手术/康复情况、医生建议等"
@@ -57,23 +59,37 @@
             <nut-picker v-model="intensityPickerValue" :columns="intensityColumns" title="选择运动强度"
                 @confirm="onIntensityConfirm" @cancel="intensityVisible = false" />
         </nut-popup>
+
+        <nut-popup v-model:visible="birthdayVisible" position="bottom" safe-area-inset-bottom>
+            <nut-picker v-model="birthdayPickerValue" :columns="birthdayColumns" title="选择生日"
+                @confirm="onBirthdayConfirm" @cancel="birthdayVisible = false" />
+        </nut-popup>
+
+        <nut-popup v-model:visible="regionVisible" position="bottom" safe-area-inset-bottom>
+            <nut-picker v-model="regionPickerValue" :columns="regionColumns" title="选择所在地区" @confirm="onRegionConfirm"
+                @cancel="regionVisible = false" />
+        </nut-popup>
     </div>
 </template>
 
 <script setup>
-import { updateUserInfoApi } from '@/api/user';
-import { computed } from 'vue';
+import { getUserInfoApi, updateUserInfoApi } from '@/api/user';
+import { getRegionNamesByCodes, resolveRegionCodes, sichuanRegion } from '@/utils/regionData';
+import { computed, watch } from 'vue';
 
 const formRef = ref(null);
 const submitting = ref(false);
 const yearsVisible = ref(false);
 const positionVisible = ref(false);
 const intensityVisible = ref(false);
+const birthdayVisible = ref(false);
+const regionVisible = ref(false);
 
 const form = reactive({
     realName: '',
     nickname: '',
-    age: '',
+    /** 出生日期，提交后端为 YYYY-MM-DD */
+    birthday: '',
     phone: '',
     yearsOfPlaying: 0,
     position: 'UNKNOWN',
@@ -81,7 +97,9 @@ const form = reactive({
     region: {
         province: '',
         city: '',
-        district: ''
+        district: '',
+        /** 街道门牌等详细地址 */
+        detail: ''
     },
     injuryDetails: ''
 });
@@ -157,21 +175,120 @@ function normalizeIntensity(raw) {
 const yearsPickerValue = ref(['0']);
 const positionPickerValue = ref(['UNKNOWN']);
 const intensityPickerValue = ref(['UNKNOWN']);
+/** 生日选择器当前值 [年, 月, 日] 字符串，与 nut-picker 多列 value 一致 */
+const birthdayPickerValue = ref(['1990', '01', '15']);
+
+function pad2(n) {
+    return String(Math.floor(n)).padStart(2, '0');
+}
+
+function todayParts() {
+    const t = new Date();
+    return { y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate() };
+}
+
+function daysInMonth(year, month) {
+    return new Date(year, month, 0).getDate();
+}
+
+/** 解析 YYYY-MM-DD */
+function parseBirthdayStr(s) {
+    if (s == null || s === '') return null;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s).trim());
+    if (!m) return null;
+    const y = parseInt(m[1], 10);
+    const mo = parseInt(m[2], 10);
+    const d = parseInt(m[3], 10);
+    if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return null;
+    return { y, m: mo, d };
+}
+
+function isValidCalendarDate(y, m, d) {
+    if (m < 1 || m > 12 || d < 1) return false;
+    const dim = daysInMonth(y, m);
+    return d <= dim;
+}
+
+function isNotFutureDate(y, m, d) {
+    const { y: cy, m: cm, d: cd } = todayParts();
+    if (y > cy) return false;
+    if (y === cy && m > cm) return false;
+    if (y === cy && m === cm && d > cd) return false;
+    return true;
+}
+
+function birthdayValidator(val) {
+    const p = parseBirthdayStr(val);
+    if (!p) return false;
+    if (!isValidCalendarDate(p.y, p.m, p.d)) return false;
+    if (!isNotFutureDate(p.y, p.m, p.d)) return false;
+    const { y: cy } = todayParts();
+    if (p.y < cy - 120) return false;
+    return true;
+}
+
+const birthdayColumns = computed(() => {
+    const { y: cy, m: cm, d: cd } = todayParts();
+    const yRaw = parseInt(birthdayPickerValue.value[0], 10);
+    const ySel = Number.isFinite(yRaw)
+        ? Math.min(cy, Math.max(cy - 120, yRaw))
+        : cy - 30;
+
+    const years = [];
+    for (let y = cy - 120; y <= cy; y += 1) {
+        years.push({ text: `${y}年`, value: String(y) });
+    }
+
+    const maxMonth = ySel === cy ? cm : 12;
+    const mRaw = parseInt(birthdayPickerValue.value[1], 10);
+    const mSel = Number.isFinite(mRaw) ? Math.min(maxMonth, Math.max(1, mRaw)) : 1;
+    const months = [];
+    for (let mo = 1; mo <= maxMonth; mo += 1) {
+        months.push({ text: `${mo}月`, value: pad2(mo) });
+    }
+
+    const dim = daysInMonth(ySel, mSel);
+    const maxDay = ySel === cy && mSel === cm ? Math.min(dim, cd) : dim;
+    const days = [];
+    for (let day = 1; day <= maxDay; day += 1) {
+        days.push({ text: `${day}日`, value: pad2(day) });
+    }
+
+    return [years, months, days];
+});
+
+function clampBirthdayPicker() {
+    const { y: cy, m: cm, d: cd } = todayParts();
+    let y = parseInt(birthdayPickerValue.value[0], 10);
+    let m = parseInt(birthdayPickerValue.value[1], 10);
+    let d = parseInt(birthdayPickerValue.value[2], 10);
+    if (!Number.isFinite(y)) y = cy - 30;
+    y = Math.min(cy, Math.max(cy - 120, y));
+    const maxM = y === cy ? cm : 12;
+    if (!Number.isFinite(m)) m = 1;
+    m = Math.min(maxM, Math.max(1, m));
+    const dim = daysInMonth(y, m);
+    const maxD = y === cy && m === cm ? Math.min(dim, cd) : dim;
+    if (!Number.isFinite(d)) d = 1;
+    d = Math.min(maxD, Math.max(1, d));
+    const ny = String(y);
+    const nm = pad2(m);
+    const nd = pad2(d);
+    const cur = birthdayPickerValue.value;
+    if (!cur || cur[0] !== ny || cur[1] !== nm || cur[2] !== nd) {
+        birthdayPickerValue.value = [ny, nm, nd];
+    }
+}
+
+watch(birthdayPickerValue, () => {
+    clampBirthdayPicker();
+}, { deep: true });
 
 const yearsDisplayText = computed(() => {
     const y = Number(form.yearsOfPlaying) || 0;
     if (y <= 0) return '未设置（0 年）';
     return `${y} 年`;
 });
-
-function ageNumberValidator(value) {
-    return /^\d+$/.test(value);
-}
-
-function ageRangeValidator(value) {
-    const n = Number(value);
-    return Number.isFinite(n) && n >= 0 && n <= 80;
-}
 
 function positionLabelByValue(val) {
     const n = normalizePosition(val);
@@ -188,6 +305,78 @@ function intensityLabelByValue(val) {
 }
 
 const intensityDisplayText = computed(() => intensityLabelByValue(form.preferredIntensity));
+
+function mapRegionPickerColumn(list) {
+    return (list || []).map((n) => ({ text: n.name, value: n.code }));
+}
+
+/** 省市区 Picker 绑定为 [省code, 市code, 区code] */
+const regionPickerValue = ref(['510000', '510100', '510104']);
+
+const regionColumns = computed(() => {
+    const [pCode, cCode] = regionPickerValue.value;
+    const p = sichuanRegion.find((x) => x.code === pCode) || sichuanRegion[0];
+    const cities = mapRegionPickerColumn(p?.children);
+    const cityNode = (p?.children || []).find((x) => x.code === cCode) || p?.children?.[0];
+    const districts = mapRegionPickerColumn(cityNode?.children);
+    return [mapRegionPickerColumn(sichuanRegion), cities, districts];
+});
+
+function clampRegionPicker() {
+    const provs = mapRegionPickerColumn(sichuanRegion);
+    let pCode = regionPickerValue.value[0];
+    if (!provs.some((x) => x.value === pCode)) pCode = provs[0]?.value;
+    const p = sichuanRegion.find((x) => x.code === pCode) || sichuanRegion[0];
+    const cities = mapRegionPickerColumn(p?.children);
+    let cCode = regionPickerValue.value[1];
+    if (!cities.some((x) => x.value === cCode)) cCode = cities[0]?.value;
+    const cityNode = (p?.children || []).find((x) => x.code === cCode);
+    const districts = mapRegionPickerColumn(cityNode?.children);
+    let dCode = regionPickerValue.value[2];
+    if (!districts.some((x) => x.value === dCode)) dCode = districts[0]?.value;
+    const next = [pCode, cCode, dCode];
+    const cur = regionPickerValue.value;
+    if (!cur || cur[0] !== next[0] || cur[1] !== next[1] || cur[2] !== next[2]) {
+        regionPickerValue.value = next;
+    }
+}
+
+watch(regionPickerValue, () => {
+    clampRegionPicker();
+}, { deep: true });
+
+const regionDisplayText = computed(() => {
+    const { province, city, district } = form.region;
+    const parts = [province, city, district].filter(Boolean);
+    return parts.join(' ');
+});
+
+function openRegionPicker() {
+    regionPickerValue.value = resolveRegionCodes(
+        form.region.province,
+        form.region.city,
+        form.region.district
+    );
+    clampRegionPicker();
+    regionVisible.value = true;
+}
+
+function onRegionConfirm({ selectedValue }) {
+    clampRegionPicker();
+    const sv = selectedValue && selectedValue.length >= 3 ? selectedValue : regionPickerValue.value;
+    const names = getRegionNamesByCodes(String(sv[0]), String(sv[1]), String(sv[2]));
+    form.region.province = names.province;
+    form.region.city = names.city;
+    form.region.district = names.district;
+    regionPickerValue.value = [String(sv[0]), String(sv[1]), String(sv[2])];
+    regionVisible.value = false;
+}
+
+const birthdayDisplayText = computed(() => {
+    const p = parseBirthdayStr(form.birthday);
+    if (!p) return '';
+    return `${p.y}年${p.m}月${p.d}日`;
+});
 
 function positionPickerValueFromForm() {
     return [normalizePosition(form.position)];
@@ -212,13 +401,32 @@ function readUserInfoFromStorage() {
     return null;
 }
 
+/** 与登录页一致：统一 phone 字段写入缓存 */
+function normalizeUserInfoForStorage(userInfo) {
+    if (!userInfo || typeof userInfo !== 'object') return userInfo;
+    const phoneFromApi = userInfo.phone ?? userInfo.mobile ?? userInfo.phoneNumber ?? userInfo.tel;
+    const normalizedPhone =
+        phoneFromApi != null && String(phoneFromApi).trim() !== ''
+            ? String(phoneFromApi).replace(/\D/g, '').slice(0, 11)
+            : String(userInfo.phone || '').replace(/\D/g, '').slice(0, 11);
+    return { ...userInfo, phone: normalizedPhone };
+}
+
 function applyUserProfile(src) {
     if (!src || typeof src !== 'object') return;
 
-    if (src.realName !== undefined && src.realName !== null) form.realName = String(src.realName);
-    if (src.nickname !== undefined && src.nickname !== null) form.nickname = String(src.nickname);
 
-    form.phone = src.phone;
+    const rawBirth = src.birthday ?? src.birthDate ?? src.dateOfBirth;
+    if (rawBirth !== undefined && rawBirth !== null && String(rawBirth).trim() !== '') {
+        const head = String(rawBirth).trim().slice(0, 10);
+        const parsed = parseBirthdayStr(head);
+        if (parsed) {
+            form.birthday = `${parsed.y}-${pad2(parsed.m)}-${pad2(parsed.d)}`;
+        }
+    }
+    form.realName = src.realName || '';
+    form.phone = src.phone || '';
+    form.nickname = src.nickname || '';
 
     if (src.yearsOfPlaying !== undefined && src.yearsOfPlaying !== null) {
         const n = Number(src.yearsOfPlaying);
@@ -237,6 +445,9 @@ function applyUserProfile(src) {
         if (src.region.province !== undefined) form.region.province = String(src.region.province || '');
         if (src.region.city !== undefined) form.region.city = String(src.region.city || '');
         if (src.region.district !== undefined) form.region.district = String(src.region.district || '');
+        if (src.region.detail !== undefined && src.region.detail !== null) {
+            form.region.detail = String(src.region.detail);
+        }
     }
 
     if (src.injuryDetails !== undefined && src.injuryDetails !== null) {
@@ -257,6 +468,28 @@ function openPositionPicker() {
 function openIntensityPicker() {
     intensityPickerValue.value = [normalizeIntensity(form.preferredIntensity)];
     intensityVisible.value = true;
+}
+
+function openBirthdayPicker() {
+    const p = parseBirthdayStr(form.birthday);
+    if (p) {
+        birthdayPickerValue.value = [String(p.y), pad2(p.m), pad2(p.d)];
+    } else {
+        const { y: cy } = todayParts();
+        birthdayPickerValue.value = [String(cy - 25), '06', '15'];
+    }
+    clampBirthdayPicker();
+    birthdayVisible.value = true;
+}
+
+function onBirthdayConfirm({ selectedValue }) {
+    clampBirthdayPicker();
+    const sv = selectedValue && selectedValue.length >= 3 ? selectedValue : birthdayPickerValue.value;
+    const ys = String(sv[0]);
+    const ms = pad2(parseInt(String(sv[1]), 10));
+    const ds = pad2(parseInt(String(sv[2]), 10));
+    form.birthday = `${ys}-${ms}-${ds}`;
+    birthdayVisible.value = false;
 }
 
 function onYearsConfirm({ selectedValue }) {
@@ -284,18 +517,37 @@ function onIntensityConfirm({ selectedOptions }) {
     intensityVisible.value = false;
 }
 
-onMounted(() => {
-    const cached = readUserInfoFromStorage();
-    if (!cached) {
+onMounted(async () => {
+    const token = uni.getStorageSync('token');
+    if (!token) {
         uni.reLaunch({ url: '/pages/login/index' });
         return;
     }
 
-    applyUserProfile(cached);
+    try {
+        const profile = await getUserInfoApi();
+        applyUserProfile(profile);
+    } catch (e) {
+        console.error('getUserInfoApi', e);
+        return;
+    }
 
     yearsPickerValue.value = [String(form.yearsOfPlaying)];
     positionPickerValue.value = positionPickerValueFromForm();
     intensityPickerValue.value = [normalizeIntensity(form.preferredIntensity)];
+
+    const bp = parseBirthdayStr(form.birthday);
+    if (bp) {
+        birthdayPickerValue.value = [String(bp.y), pad2(bp.m), pad2(bp.d)];
+    }
+    clampBirthdayPicker();
+
+    regionPickerValue.value = resolveRegionCodes(
+        form.region.province,
+        form.region.city,
+        form.region.district
+    );
+    clampRegionPicker();
 });
 
 function buildPayload() {
@@ -303,6 +555,7 @@ function buildPayload() {
     return {
         realName: form.realName,
         nickname: form.nickname,
+        birthday: form.birthday || '',
         phone: form.phone,
         yearsOfPlaying: Number(form.yearsOfPlaying) || 0,
         position: normalizePosition(form.position),
@@ -312,7 +565,8 @@ function buildPayload() {
         region: {
             province: form.region.province || '',
             city: form.region.city || '',
-            district: form.region.district || ''
+            district: form.region.district || '',
+            detail: (form.region.detail || '').trim()
         }
     };
 }
@@ -330,11 +584,14 @@ async function handleSubmit() {
     try {
         const payload = buildPayload();
         await updateUserInfoApi(payload);
-        const prev = readUserInfoFromStorage() || {};
-        uni.setStorageSync('userInfo', {
-            ...prev,
-            ...payload
-        });
+        try {
+            const fresh = await getUserInfoApi();
+            uni.setStorageSync('userInfo', normalizeUserInfoForStorage(fresh));
+        } catch (e) {
+            console.error('getUserInfoApi after update', e);
+            const prev = readUserInfoFromStorage() || {};
+            uni.setStorageSync('userInfo', normalizeUserInfoForStorage({ ...prev, ...payload }));
+        }
         uni.showToast({ title: '保存成功', icon: 'success' });
         setTimeout(() => uni.navigateBack(), 800);
     } catch (e) {
@@ -351,10 +608,6 @@ async function handleSubmit() {
     padding: 24rpx 24rpx 48rpx;
     box-sizing: border-box;
     background: #f4f6f8;
-}
-
-.region-row {
-    margin-top: 16rpx;
 }
 
 .footer-actions {
