@@ -1,0 +1,32 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 5162180 */
+  /* Color fonts */
+  src: 
+       url('data:application/x-font-woff2;charset=utf-8;base64,d09GMgABAAAAAAUwAAwAAAAACPAAAAThAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIj4jEgZgAEwKilSIUQE2AiQDHAsaAAQgBYF8ByAb/gbIxn/+3axz84CWhCmpeSjUlJrpiGmy67Dro6pkRfWLgXPyo3A2kJEc6OAXWdSjKZKiy/B46qbTLXpYXmEHh1HB3+4oABoAbgAioAMHgFGAoAEI2ssIOgAuAFwB6AHwAAQAAAFc+TTACY0G9Ba00HCrudEA6ppOaDSsZAURIRH71DfUl+EipG+XMtkpA0xGhZkdAQ7cPQASRpEAA+AVINoYNcgMR+p6qi+kb+gb27dLnU5gYCPL+XkA5z/fb5qpYiIzoPF+AHwBugVwyZtNmhAJauag4RotR84TxZAQNzfRIIqe3havhGCTmLxgLtrH/oSY8ph3sz0EJz8StEb7rlaycybZvarZ03HEoBTethTyMkG4MkCMQ9ztK0hZXkh2n5DswQSWPET6R8JoiF4QMeTS2jUBZ9jvHJl5+DZvu3kQ8qFbHfZzkM+CnudJuTDGrqqkOBwg6elTyM+e9dj51SA/fcrbHA5SVHWefYfvHlJiHIbXWncGL9vlvUsYYW9btgyy19KQU5b7LF9OygpfkX33EBPsgWtiaPTu6xYaudN/lSBw8i4vXXuIBHR2Mym7vf2fnQDP+DErvDGK5xYojvYLasJ+R2nysXvB6w5altt4KFshbyPcemZa5bfSQrxJoB2BawJoxfAHasphB3/9adLBZ3U3L6hOqVE74r96pErAjmMZz6Rtvs1TZKKlO3mDbbcPKQr52G5CWoMHlScZ1uX80adxe59lxa73pqXaZoaTYOZpe8DqwC1qDSk72D22k6/N5rX9cM4fFzM93kHWl7GprB25nh6ZLAS5X/yfdfh3pG9MMHuYv7G4m1Wzu+WbIWSEKo4Wv+F6VWxvktpxaY9ZDPsNBpn7+Hu8nqX1iW3G34yt4tjO3+VLkJTfYLQy26R6hIiqfwvDPUr89R/xd/Uf63nmvMt/pF/RG/gP+TFa94BOL+X/LUl/F3B+w9c9vq4PPRP0anDwK0EMrnq9CmdM+czS0hkV5QicWVZeDjea8oqhR2nZhbR2q7U9LR2B7SlpaTAUpKfNsvp+6SN+cntZRKCL7TjHwVtPakoc9v7UwErnlzPWeYQz/ah2/Zus2ZRSrmUuYXPWIWmjweuMZ2yL6dy5WbSgU5IS8XzXi+fPm5piPc94nQR2zxOVJzrNquNn6D70/17Ht3RPnVzRWkpjyqd3I/fh/vqG50stTV7D+/o6EyMumeqahn7+FRwRVoniStC0xrbv1Bs3NkEzPAmFDx+mQtf4q0/YnJycUZUFn42urK42zXX5f2DAurA81n2OeyW4dWxZyoK+gafurKR46qTKYhfv8GLXCZVFU1kxYxyBgNARxi+MI0IBAnEsqC+qKCKiOCoqoqgoMioawA0yfLC4KMJzX9T45y4dEn6rTTMI3j0FpZb6F+p0OjDmtUdCUjPDoRM31Pca2qYRVoriKoDjsPbzLIHhEU/W1xQNGHP/dmX/D8c3un7PJtfqfMYeslgg12LCeL7rWgNYkcQeZihMBDPjykc/it7D8lFP76IXubAKBgzYB637smSdDvVgII0eBBEY9BzcbjiEGNIRAmkgoRXSIgAzl+kg4Q2MwwhMwWSMro6biWaMwhjMwkQMYTqSkYAk6spBPRq4pKwrK94u/lb2SJgkaZ94pmMGxsFmyUFNRnUMRJzzCKwAAAA=') format('woff2'),
+       url('iconfont.ttf?t=1776332179831') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-qiuchang:before {
+  content: "\e600";
+}
+
+.icon-team:before {
+  content: "\e794";
+}
+
+.icon-home:before {
+  content: "\e68a";
+}
+
+.icon-mine:before {
+  content: "\e601";
+}
+
