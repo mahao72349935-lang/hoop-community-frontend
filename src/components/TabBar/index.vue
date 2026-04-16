@@ -3,9 +3,9 @@
         <nut-tabbar v-model="activeTab" @tab-switch="tabSwitch" bottom safe-area-inset-bottom inactive-color="#7d7e80"
             active-color="#6474E5">
             <nut-tabbar-item v-for="item in tabList" :key="item.name" :name="item.name" :tab-title="item.title">
-                <template #icon="{ active }">
+                <template #icon>
                     <nut-icon font-class-name="iconfont" class-prefix="icon" :name="item.iconName"
-                        :color="active ? '#6474E5' : '#7d7e80'" />
+                        :color="activeTab === item.name ? '#6474E5' : '#7d7e80'" />
                 </template>
             </nut-tabbar-item>
         </nut-tabbar>
@@ -43,8 +43,8 @@ const props = defineProps({
 
 const activeTab = ref('home');
 
-watch(() => {
-    activeTab.value = props.tab;
+watch(() => props.tab, (newVal) => {
+    activeTab.value = newVal;
 });
 
 const tabSwitch = (item) => {
