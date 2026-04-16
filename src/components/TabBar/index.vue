@@ -1,5 +1,5 @@
 <!--
- * @Description: 
+ * @Description:
  * @Author: mahao
  * @Date: 2026-04-13 16:10:50
  * @LastEditors: mahao
@@ -21,6 +21,11 @@ const tabList = ref([
         title: '首页',
         icon: 'home',
         name: 'home'
+    },
+    {
+        title: '我的球队',
+        icon: 'myTeam',
+        name: 'myTeam'
     },
     {
         title: '我的',

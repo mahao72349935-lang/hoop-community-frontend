@@ -69,7 +69,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
 // 替换为你项目实际的 API 和地区数据
-// import { createTeamApi } from '@/api/team';
+import { createTeamApi } from '@/api/team';
 import { getRegionNamesByCodes, resolveRegionCodes, sichuanRegion } from '@/utils/regionData';
 
 // ─────────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ const submitting = ref(false);
 
 const form = reactive({
     name: '',
-    logoUrl: '',
+    logoUrl: 'https://www.schyhb.com.cn/eco-nexus-file/openFile/2026-04/ys435512d91294454bba750a45c53b9591-517639798_17936104.jpg',
     description: '',
     preferredIntensity: '',
     region: {
@@ -229,7 +229,7 @@ async function handleSubmit() {
             region: { ...form.region },
         };
 
-        // await createTeamApi(payload);
+        await createTeamApi(payload);
         console.log('创建球队 payload:', payload); // 调试用，联调时替换为上方真实接口
 
         uni.showToast({ title: '创建成功！', icon: 'success' });

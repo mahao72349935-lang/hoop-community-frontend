@@ -1,11 +1,12 @@
-import axios from 'axios';
 import { createUniAppAxiosAdapter } from '@uni-helper/axios-adapter';
+import axios from 'axios';
 
-const TEST_URL = 'http://localhost:3000/';
-const PROD_URL = 'https://schyhb.com.cn/fspm/';
+const TEST_URL = 'http://localhost:3000';
+// const PROD_URL = 'https://schyhb.com.cn/fspm/';
 // 创建axios实例
+const baseURL = process.env.NODE_ENV === 'development' ? TEST_URL : PROD_URL;
 const request = axios.create({
-    baseURL: process.env.NODE_ENV === 'development' ? TEST_URL : PROD_URL,
+    baseURL: `${baseURL}/api/v1`,
     timeout: 10000,
     adapter: createUniAppAxiosAdapter()
 });

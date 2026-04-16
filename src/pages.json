@@ -8,6 +8,13 @@
             }
         },
         {
+            "path": "pages/myTeam/index",
+            "style": {
+                "navigationBarTitleText": "我的球队",
+                "navigationBarBackgroundColor": "#fff"
+            }
+        },
+        {
             "path": "pages/mine/index",
             "style": {
                 "navigationBarTitleText": "个人中心",
@@ -54,6 +61,10 @@
             {
                 "pagePath": "pages/home/index",
                 "text": "首页"
+            },
+            {
+                "pagePath": "pages/myTeam/index",
+                "text": "我的球队"
             },
             {
                 "pagePath": "pages/mine/index",
