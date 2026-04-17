@@ -8,6 +8,13 @@
             }
         },
         {
+            "path": "pages/court/index",
+            "style": {
+                "navigationBarTitleText": "球场",
+                "navigationBarBackgroundColor": "#fff"
+            }
+        },
+        {
             "path": "pages/myTeam/index",
             "style": {
                 "navigationBarTitleText": "我的球队",
@@ -61,6 +68,10 @@
             {
                 "pagePath": "pages/home/index",
                 "text": "首页"
+            },
+            {
+                "pagePath": "pages/court/index",
+                "text": "球场"
             },
             {
                 "pagePath": "pages/myTeam/index",

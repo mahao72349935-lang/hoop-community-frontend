@@ -13,15 +13,37 @@
                     </div>
                 </div>
             </div>
+            <div>
+                <div class="home-menu-title">球队列表</div>
+                <div class="team-list-container">
+                    <div class="team-list-item" v-for="team in teamList" :key="team.teamId">
+                        <div class="team-list-item-logo">
+                            <image :src="team.logoUrl" mode="aspectFill" />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <TabBar tab="home" />
     </view>
 </template>
 
 <script setup>
+import { getTeamListApi } from '@/api/team';
 import TabBar from '@/components/TabBar/index.vue';
-import { ref, computed } from 'vue';
 import { playerMenu, venueOwnerMenu } from '@/constants/homeMenu';
+import { computed, ref } from 'vue';
+
+const teamList = ref([]);
+
+onMounted(() => {
+    fetchTeamList();
+});
+
+const fetchTeamList = async () => {
+    const data = await getTeamListApi();
+    teamList.value = data;
+};
 
 // 用户角色 (这里可以从store或API获取)
 const userRole = ref('player'); // 'player','venue_owner'

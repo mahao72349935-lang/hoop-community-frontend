@@ -3,7 +3,7 @@
         <div class="mine-header">
             <div class="header-left">
                 <nut-avatar size="large" v-if="userInfo.avatarUrl">
-                    <image :src="userInfo.avatarUrl"></image>
+                    <image mode="aspectFill" class="avatar-img" :src="userInfo.avatarUrl" />
                 </nut-avatar>
                 <div class="avatar" v-else>{{ userName }}</div>
             </div>
@@ -119,6 +119,10 @@ const handleCreateTeam = () => {
                 font-size: 32rpx;
                 text-align: center;
                 line-height: 100rpx;
+
+                .avatar-img {
+                    object-fit: cover;
+                }
             }
         }
 

@@ -2,103 +2,113 @@ import { createUniAppAxiosAdapter } from '@uni-helper/axios-adapter';
 import axios from 'axios';
 
 const TEST_URL = 'http://localhost:3000';
-// const PROD_URL = 'https://schyhb.com.cn/fspm/';
-// 创建axios实例
+const PROD_URL = 'https://schyhb.com.cn/fspm';
+
 const baseURL = process.env.NODE_ENV === 'development' ? TEST_URL : PROD_URL;
+
 const request = axios.create({
     baseURL: `${baseURL}/api/v1`,
     timeout: 10000,
     adapter: createUniAppAxiosAdapter()
 });
 
-// 请求拦截器
+// ─── loading 计数器，避免并发闪烁 ─────────────
+let loadingCount = 0;
+const showLoading = () => {
+    if (loadingCount === 0) {
+        uni.showLoading({ title: '加载中...', mask: true });
+    }
+    loadingCount++;
+};
+const hideLoading = () => {
+    loadingCount = Math.max(0, loadingCount - 1);
+    if (loadingCount === 0) uni.hideLoading();
+};
+
+// ─── 避免 401 并发重复跳转 ───────────────────
+let isRedirectingToLogin = false;
+
+// ─── 请求拦截器 ─────────────────────────────
 request.interceptors.request.use(
     (config) => {
-        // 显示加载提示
-        uni.showLoading({
-            title: '加载中...',
-            mask: true
-        });
+        if (!config.silent) showLoading();
 
-        // 添加token到请求头
         const token = uni.getStorageSync('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
+        if (token) config.headers.Authorization = `Bearer ${token}`;
 
-        // 添加时间戳防止缓存
         if (config.method === 'get') {
-            config.params = {
-                ...config.params,
-                _t: Date.now()
-            };
+            config.params = { ...config.params, _t: Date.now() };
         }
-
         return config;
     },
     (error) => {
-        uni.hideLoading();
-        console.error('请求错误:', error);
+        hideLoading();
         return Promise.reject(error);
     }
 );
 
-// 响应拦截器
+// ─── 响应拦截器 ─────────────────────────────
 request.interceptors.response.use(
     (response) => {
-        uni.hideLoading();
+        if (!response.config.silent) hideLoading();
 
         const { data, status } = response;
 
-        // 根据业务状态码处理
-        if (status === 200) {
-            // 如果后端返回的数据结构是 { code, data, message }
-            if (data && typeof data === 'object' && 'code' in data) {
-                if (data.code === 200 || data.code === 0) {
-                    return data.data || data;
-                } else {
-                    // 业务错误
-                    const errorMsg = data.message || '请求失败';
-                    uni.showToast({
-                        title: errorMsg,
-                        icon: 'none',
-                        duration: 2000
-                    });
-                    return Promise.reject(new Error(errorMsg));
+        // 所有 2xx 都算成功
+        if (status >= 200 && status < 300) {
+            // 204 No Content：无响应体（删除等）
+            if (status === 204) return null;
+
+            // 统一响应结构：{ code, success, message, data }
+            if (data && typeof data === 'object' && 'success' in data) {
+                if (data.success) {
+                    return data.data ?? null;
                 }
+                // HTTP 成功但业务失败（较少见）
+                const msg = data.message || '请求失败';
+                if (!response.config.silentError) {
+                    uni.showToast({ title: msg, icon: 'none', duration: 2000 });
+                }
+                return Promise.reject(new Error(msg));
             }
+
             return data;
-        } else {
-            uni.showToast({
-                title: '请求失败',
-                icon: 'none',
-                duration: 2000
-            });
-            return Promise.reject(new Error('请求失败'));
         }
+
+        return Promise.reject(new Error('请求失败'));
     },
     (error) => {
-        uni.hideLoading();
+        if (!error.config?.silent) hideLoading();
 
         let errorMessage = '网络错误';
 
         if (error.response) {
             const { status, data } = error.response;
-
             switch (status) {
+                case 400:
+                    errorMessage = data?.message || '请求参数错误';
+                    break;
                 case 401:
                     errorMessage = '未授权，请重新登录';
-                    // 清除token并跳转到登录页
                     uni.removeStorageSync('token');
-                    uni.reLaunch({
-                        url: '/pages/login/index'
-                    });
+                    if (!isRedirectingToLogin) {
+                        isRedirectingToLogin = true;
+                        uni.reLaunch({
+                            url: '/pages/login/index',
+                            complete: () => {
+                                isRedirectingToLogin = false;
+                            }
+                        });
+                    }
                     break;
                 case 403:
-                    errorMessage = '拒绝访问';
+                    errorMessage = data?.message || '拒绝访问';
                     break;
                 case 404:
-                    errorMessage = '请求地址不存在';
+                    errorMessage = data?.message || '请求地址不存在';
+                    break;
+                case 409:
+                    errorMessage = data?.message || '资源冲突';
                     break;
                 case 500:
                     errorMessage = '服务器内部错误';
@@ -117,73 +127,50 @@ request.interceptors.response.use(
             }
         } else if (error.code === 'ECONNABORTED') {
             errorMessage = '请求超时';
-        } else if (error.message.includes('Network Error')) {
+        } else if (error.message?.includes('Network Error')) {
             errorMessage = '网络连接失败';
         }
 
-        uni.showToast({
-            title: errorMessage,
-            icon: 'none',
-            duration: 2000
-        });
+        if (!error.config?.silentError) {
+            uni.showToast({ title: errorMessage, icon: 'none', duration: 2000 });
+        }
 
         return Promise.reject(error);
     }
 );
 
-// 封装请求方法
+// ─── 请求方法封装 ───────────────────────────
 export const http = {
     get(url, params = {}, config = {}) {
-        return request({
-            method: 'get',
-            url,
-            params,
-            ...config
-        });
+        return request({ method: 'get', url, params, ...config });
     },
-
     post(url, data = {}, config = {}) {
-        return request({
-            method: 'post',
-            url,
-            data,
-            ...config
-        });
+        return request({ method: 'post', url, data, ...config });
     },
-
     put(url, data = {}, config = {}) {
-        return request({
-            method: 'put',
-            url,
-            data,
-            ...config
-        });
+        return request({ method: 'put', url, data, ...config });
     },
-
+    patch(url, data = {}, config = {}) {
+        return request({ method: 'patch', url, data, ...config });
+    },
     delete(url, params = {}, config = {}) {
-        return request({
-            method: 'delete',
-            url,
-            params,
-            ...config
-        });
+        return request({ method: 'delete', url, params, ...config });
     },
-
     upload(url, filePath, name = 'file', formData = {}, config = {}) {
         return new Promise((resolve, reject) => {
             uni.uploadFile({
                 url: request.defaults.baseURL + url,
                 filePath,
                 name,
-                formData: {
-                    ...formData,
-                    token: uni.getStorageSync('token')
+                formData: { ...formData, token: uni.getStorageSync('token') },
+                header: {
+                    Authorization: `Bearer ${uni.getStorageSync('token')}`
                 },
                 success: (res) => {
                     try {
                         const data = JSON.parse(res.data);
-                        if (data.code === 200 || data.code === 0) {
-                            resolve(data.data || data);
+                        if (data.success) {
+                            resolve(data.data ?? null);
                         } else {
                             reject(new Error(data.message || '上传失败'));
                         }
@@ -191,33 +178,25 @@ export const http = {
                         reject(new Error('上传失败'));
                     }
                 },
-                fail: (error) => {
-                    reject(error);
-                }
+                fail: reject,
+                ...config
             });
         });
     },
-
     download(url, config = {}) {
         return new Promise((resolve, reject) => {
             uni.downloadFile({
                 url: request.defaults.baseURL + url,
                 success: (res) => {
-                    if (res.statusCode === 200) {
-                        resolve(res);
-                    } else {
-                        reject(new Error('下载失败'));
-                    }
+                    if (res.statusCode === 200) resolve(res);
+                    else reject(new Error('下载失败'));
                 },
-                fail: (error) => {
-                    reject(error);
-                }
+                fail: reject,
+                ...config
             });
         });
     }
 };
 
-// 导出request实例，方便直接使用
 export { request };
-
 export default request;

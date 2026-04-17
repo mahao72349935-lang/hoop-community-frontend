@@ -1,17 +1,19 @@
-import { request } from '@/utils/request';
+import { http } from '@/utils/request';
 
-export const createTeamApi = (data) => {
-    return request({
-        method: 'post',
-        url: '/team/createTeam',
-        data
-    });
-};
+// 获取我加入的球队列表（页面自有 loading，避免与拦截器全局 loading 叠层）
+export const getJoinedTeamListApi = () => http.get('/teams/joined', {}, { silent: true });
 
-export const getTeamListApi = (params) => {
-    return request({
-        method: 'get',
-        url: '/team/updateTeam',
-        params
-    });
-};
+// 获取所有球队列表
+export const getTeamListApi = () => http.get('/teams');
+
+// 获取球队详情
+export const getTeamDetailApi = (teamId) => http.get(`/teams/${teamId}`);
+
+// 创建球队
+export const createTeamApi = (payload) => http.post('/teams', payload);
+
+// 编辑球队
+export const updateTeamApi = (teamId, payload) => http.patch(`/teams/${teamId}`, payload);
+
+// 解散球队
+export const deleteTeamApi = (teamId) => http.delete(`/teams/${teamId}`);

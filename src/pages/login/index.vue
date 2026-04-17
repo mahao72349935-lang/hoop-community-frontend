@@ -54,8 +54,11 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { registerApi, loginApi } from '../../api/user';
+import { reactive, ref } from 'vue';
+import { loginApi, registerApi } from '../../api/user';
+import { useUserStore } from '@/store/user';
+
+const userStore = useUserStore();
 
 const logoUrl = ref('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%236474E5"/><path d="M50 5 L50 95 M5 50 L95 50 M18 18 Q 50 50 18 82 M82 18 Q 50 50 82 82" stroke="%23fff" stroke-width="4" fill="none" /></svg>');
 
@@ -129,20 +132,11 @@ const handleSubmit = async () => {
                     const res = isRegister.value ? await registerApi(requestData) : await loginApi(requestData);
 
                     uni.hideLoading();
-
-                    // 后端返回 { code: 200, data: { userInfo, accessToken } }
-                    // 经过 axios 拦截器 (code === 200 → return data.data)，res = { userInfo, accessToken }
                     const { accessToken, userInfo } = res;
 
-                    // 存储 token 和用户信息（接口可能返回 mobile/phoneNumber 等，统一写入 phone 便于各页回显）
-                    const phoneFromApi = userInfo?.phone ?? userInfo?.mobile ?? userInfo?.phoneNumber ?? userInfo?.tel;
-                    const normalizedPhone = phoneFromApi != null && String(phoneFromApi).trim() !== ''
-                        ? String(phoneFromApi).replace(/\D/g, '').slice(0, 11)
-                        : String(formData.phone || '').replace(/\D/g, '').slice(0, 11);
-                    const mergedUserInfo = { ...userInfo, phone: normalizedPhone };
-
                     uni.setStorageSync('token', accessToken);
-                    uni.setStorageSync('userInfo', mergedUserInfo);
+                    userStore.setUserInfo(userInfo);
+
 
                     uni.showToast({
                         title: isRegister.value ? '注册成功' : '登录成功',

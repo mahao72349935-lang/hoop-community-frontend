@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: mahao
+ * @Date: 2026-04-17 09:06:47
+ * @LastEditors: mahao
+ * @LastEditTime: 2026-04-17 09:28:25
+-->
 <template>
     <div class="tab-bar-container">
         <nut-tabbar v-model="activeTab" @tab-switch="tabSwitch" bottom safe-area-inset-bottom inactive-color="#7d7e80"
@@ -22,6 +29,12 @@ const tabList = ref([
         name: 'home'
     },
     {
+        title: '球场',
+        name: 'court',
+        customType: 'iconfont',
+        iconName: 'court',
+    },
+    {
         title: '我的球队',
         name: 'myTeam',
         customType: 'iconfont',
@@ -43,8 +56,8 @@ const props = defineProps({
 
 const activeTab = ref('home');
 
-watch(() => props.tab, (newVal) => {
-    activeTab.value = newVal;
+onShow(() => {
+    activeTab.value = props.tab;
 });
 
 const tabSwitch = (item) => {

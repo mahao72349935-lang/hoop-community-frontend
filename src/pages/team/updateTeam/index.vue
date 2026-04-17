@@ -79,7 +79,7 @@ const submitting = ref(false);
 
 const form = reactive({
     name: '',
-    logoUrl: 'https://www.schyhb.com.cn/eco-nexus-file/openFile/2026-04/ys435512d91294454bba750a45c53b9591-517639798_17936104.jpg',
+    logoUrl: 'http://th-img-test-1308953979.cos.ap-chengdu.myqcloud.com/img/111/26041714590878899540201067.jpg',
     description: '',
     preferredIntensity: '',
     region: {
