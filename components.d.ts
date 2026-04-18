@@ -18,9 +18,11 @@ declare module 'vue' {
     NutInput: typeof import('nutui-uniapp/components/input/input.vue')['default']
     NutPicker: typeof import('nutui-uniapp/components/picker/picker.vue')['default']
     NutPopup: typeof import('nutui-uniapp/components/popup/popup.vue')['default']
+    NutSearchbar: typeof import('nutui-uniapp/components/searchbar/searchbar.vue')['default']
     NutTabbar: typeof import('nutui-uniapp/components/tabbar/tabbar.vue')['default']
     NutTabbarItem: typeof import('nutui-uniapp/components/tabbaritem/tabbaritem.vue')['default']
     NutTextarea: typeof import('nutui-uniapp/components/textarea/textarea.vue')['default']
     TabBar: typeof import('./src/components/TabBar/index.vue')['default']
+    TeamCard: typeof import('./src/components/TeamCard/index.vue')['default']
   }
 }

@@ -58,6 +58,21 @@
                         "navigationBarTitleText": "创建球队",
                         "navigationBarBackgroundColor": "#fff"
                     }
+                },
+                {
+                    "path": "teamList/index",
+                    "style": {
+                        "navigationBarTitleText": "球队列表",
+                        "navigationBarBackgroundColor": "#fff"
+                    }
+                },
+                {
+                    "path": "teamDetail/index",
+                    "style": {
+                        "navigationStyle": "custom",
+                        "navigationBarTextStyle": "black",
+                        "backgroundColor": "#f5f5f5"
+                    }
                 }
             ]
         }

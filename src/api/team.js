@@ -6,8 +6,8 @@ export const getJoinedTeamListApi = () => http.get('/teams/joined', {}, { silent
 // 获取所有球队列表
 export const getTeamListApi = () => http.get('/teams');
 
-// 获取球队详情
-export const getTeamDetailApi = (teamId) => http.get(`/teams/${teamId}`);
+// 获取球队详情（页面自有加载态）
+export const getTeamDetailApi = (teamId) => http.get(`/teams/${teamId}`, {}, { silent: true });
 
 // 创建球队
 export const createTeamApi = (payload) => http.post('/teams', payload);
@@ -17,3 +17,6 @@ export const updateTeamApi = (teamId, payload) => http.patch(`/teams/${teamId}`,
 
 // 解散球队
 export const deleteTeamApi = (teamId) => http.delete(`/teams/${teamId}`);
+
+// 获取精选球队/featured
+export const getFeaturedTeamListApi = () => http.get('/teams/featured');
