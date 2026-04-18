@@ -1,3 +1,5 @@
+import { getTeamTagIconClassByKey } from '@/constants/teamTags';
+
 /**
  * 格式化日期为 YYYY.MM.DD
  * @param {string|Date} iso - ISO 日期字符串或 Date 对象
@@ -24,14 +26,23 @@ export const getFirstTag = (team) => {
 };
 
 /**
- * 格式化标签显示文本（emoji + label）
- * @param {Object} tag - { emoji?: string, label?: string }
+ * 标签文案（不含图标，图标用 getTeamTagIconClass）
+ * @param {Object} tag - { key?: string, label?: string }
  * @returns {string}
  */
 export const formatTagDisplay = (tag) => {
     if (!tag) return '';
-    const label = tag.label || '';
-    return tag.emoji ? `${tag.emoji} ${label}` : label;
+    return tag.label || '';
+};
+
+/**
+ * 球队标签对应的 iconfont 图标类名（如 icon-huoyue），无映射时返回空串
+ * @param {Object} tag - { key?: string }
+ * @returns {string}
+ */
+export const getTeamTagIconClass = (tag) => {
+    if (!tag) return '';
+    return getTeamTagIconClassByKey(tag.key);
 };
 
 /**

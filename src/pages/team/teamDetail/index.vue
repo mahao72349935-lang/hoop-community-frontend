@@ -29,9 +29,11 @@
                 </view>
 
                 <view class="content-card">
-                    <view v-if="mergedTags.length" class="tags-row">
-                        <view v-for="(tag, i) in mergedTags" :key="tag.key" class="tag-pill">
-                            <text class="tag-text">{{ formatTag(tag) }}</text>
+                    <view v-if="detail.allTags.length" class="tags-row">
+                        <view v-for="(tag, i) in detail.allTags" :key="tag.key || i" class="tag-pill">
+                            <view v-if="getTeamTagIconClass(tag)"
+                                :class="['iconfont', 'tag-pill-icon', getTeamTagIconClass(tag)]" />
+                            <text class="tag-text">{{ formatTagDisplay(tag) }}</text>
                         </view>
                     </view>
 
@@ -39,12 +41,12 @@
 
                     <view class="meta-rows">
                         <view class="meta-row">
-                            <text class="meta-icon">👥</text>
+                            <text class="meta-icon iconfont icon-team"></text>
                             <text class="meta-label">成员</text>
                             <text class="meta-value">{{ detail.memberCount ?? 0 }} 人</text>
                         </view>
                         <view class="meta-row">
-                            <text class="meta-icon">🏀</text>
+                            <text class="meta-icon iconfont icon-dengji"></text>
                             <text class="meta-label">比赛强度</text>
                             <text class="meta-value">{{ intensityLabel(detail.preferredIntensity) }}</text>
                         </view>
@@ -56,7 +58,7 @@
                             <text v-if="regionDetail" class="loc-line2">{{ regionDetail }}</text>
                         </view>
                         <view class="loc-map-placeholder">
-                            <text class="loc-pin">📍</text>
+                            <text class="loc-pin iconfont icon-weizhi2"></text>
                         </view>
                     </view>
 
@@ -72,7 +74,7 @@
                     <view v-show="activeTab === 'intro'" class="tab-panel">
                         <text class="desc-text">{{ detail.description || '暂无介绍' }}</text>
                         <view v-if="detail.inviteCode" class="notice-bar">
-                            <text class="notice-icon">📋</text>
+                            <text class="notice-icon iconfont icon-yaoqingma"></text>
                             <view class="notice-mid">
                                 <text class="notice-title">邀请码 {{ detail.inviteCode }}</text>
                                 <text v-if="inviteExpireText" class="notice-sub">{{ inviteExpireText }}</text>
@@ -138,7 +140,7 @@
 
 <script setup>
 import { getTeamDetailApi } from '@/api/team';
-import { formatDate } from '@/utils/format';
+import { formatDate, formatTagDisplay, getTeamTagIconClass } from '@/utils/format';
 import { onLoad } from '@dcloudio/uni-app';
 import { computed, ref } from 'vue';
 
@@ -179,31 +181,6 @@ const shortId = (id) => {
     return `${id.slice(0, 4)}…${id.slice(-4)}`;
 };
 
-const formatTag = (tag) => {
-    if (!tag) return '';
-    const label = tag.label || '';
-    return tag.emoji ? `${tag.emoji} ${label}` : label;
-};
-
-/** 合并 allTags / systemTags / tags / displayTags，按 key 去重，全部展示 */
-const mergedTags = computed(() => {
-    const d = detail.value;
-    if (!d) return [];
-    const map = new Map();
-    const pushArr = (arr) => {
-        if (!Array.isArray(arr)) return;
-        arr.forEach((t) => {
-            if (!t || (!t.label && !t.key)) return;
-            const k = t.key || t.label;
-            if (!map.has(k)) map.set(k, t);
-        });
-    };
-    pushArr(d.allTags);
-    pushArr(d.systemTags);
-    pushArr(d.tags);
-    pushArr(d.displayTags);
-    return [...map.values()];
-});
 
 const regionLine = computed(() => {
     const r = detail.value?.region;
@@ -422,11 +399,25 @@ const onApply = () => {
     background: #bbdefb;
     border-radius: 8rpx;
     border: 1rpx solid #2196f3;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8rpx;
+}
+
+.tag-pill-icon {
+    flex-shrink: 0;
+    font-size: 26rpx;
+    color: #6474E5;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tag-text {
     font-size: 22rpx;
-    color: #fff;
+    color: #6474E5;
     font-weight: 500;
 }
 
@@ -733,7 +724,7 @@ const onApply = () => {
 
 .bar-cta {
     padding: 20rpx 36rpx;
-    background: linear-gradient(135deg, #ff9f43 0%, #ff7a18 100%);
+    background: linear-gradient(135deg, #6474E5 0%, #2196F3 100%);
     border-radius: 999rpx;
 }
 

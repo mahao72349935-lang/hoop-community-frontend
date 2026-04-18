@@ -1,7 +1,7 @@
 import { createUniAppAxiosAdapter } from '@uni-helper/axios-adapter';
 import axios from 'axios';
 
-const TEST_URL = 'http://localhost:3000';
+const TEST_URL = 'http://192.168.0.101:3000';
 const PROD_URL = 'https://schyhb.com.cn/fspm';
 
 const baseURL = process.env.NODE_ENV === 'development' ? TEST_URL : PROD_URL;
@@ -37,7 +37,7 @@ request.interceptors.request.use(
         if (token) config.headers.Authorization = `Bearer ${token}`;
 
         if (config.method === 'get') {
-            config.params = { ...config.params, _t: Date.now() };
+            config.params = { ...config.params };
         }
         return config;
     },

@@ -16,9 +16,7 @@
             <div class="hot-team-section">
                 <div class="hot-team-header">
                     <div class="hot-team-title-wrap">
-                        <view class="hot-team-hex-icon" aria-hidden="true">
-                            <text class="hot-team-star">★</text>
-                        </view>
+                        <text class="iconfont icon-board"></text>
                         <text class="hot-team-title-text">热门球队</text>
                     </div>
                     <view class="hot-team-more" @click="goHotTeamMore">
@@ -218,6 +216,10 @@ const handleMenuClick = (item) => {
             display: flex;
             align-items: center;
             gap: 12rpx;
+
+            .icon-board {
+                color: #6474E5;
+            }
         }
 
         .hot-team-hex-icon {

@@ -9,6 +9,8 @@
         </view>
         <view class="team-card-body">
             <view v-if="tag" class="team-card-tag">
+                <text v-if="getTeamTagIconClass(tag)"
+                    :class="['iconfont', 'tag-pill-icon', getTeamTagIconClass(tag)]" />
                 <text>{{ tagText }}</text>
             </view>
             <text class="team-card-name">{{ team.name }}</text>
@@ -19,7 +21,7 @@
 </template>
 
 <script setup>
-import { formatDate, formatMemberCount, formatTagDisplay, getFirstTag } from '@/utils/format';
+import { formatDate, formatMemberCount, formatTagDisplay, getFirstTag, getTeamTagIconClass } from '@/utils/format';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -113,14 +115,20 @@ const handleClick = () => {
 }
 
 .team-card-tag {
-    align-self: flex-start;
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 4rpx;
     padding: 4rpx 12rpx;
     background: #ecfdf5;
     border-radius: 8rpx;
     font-size: 20rpx;
     color: #047857;
     font-weight: 500;
-    line-height: 1.4;
+
+    .tag-pill-icon {
+        font-size: 20rpx;
+    }
 }
 
 .team-card-name {
